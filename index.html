@@ -12,7 +12,6 @@
         h1 { color: #d4af37; border-bottom: 2px solid #d4af37; padding-bottom: 15px; font-size: 26px; text-align: center; margin-top: 10px; letter-spacing: 2px; }
         .intro { text-align: center; font-size: 15px; color: #b3a2c7; line-height: 1.8; margin-bottom: 30px; letter-spacing: 1px; }
         
-        /* 📱 スマホでも絶対に横一列に綺麗に並べるための魔法のデザイン */
         .input-group { 
             margin-bottom: 25px; 
             text-align: center; 
@@ -23,7 +22,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            flex-wrap: nowrap; /* 絶対に折り返さない */
+            flex-wrap: nowrap;
         }
         label { font-weight: bold; font-size: 15px; color: #d4af37; white-space: nowrap; }
         input[type="number"] { padding: 6px; width: 60px; border: 1px solid #d4af37; background: #0d0814; border-radius: 6px; font-size: 18px; text-align: center; color: #ffffff; font-weight: bold; margin: 0 8px; }
@@ -32,6 +31,9 @@
         button { padding: 14px 40px; background: linear-gradient(135deg, #8a2be2, #4a0e4e); color: #ffffff; border: 1px solid #d4af37; border-radius: 25px; font-size: 18px; cursor: pointer; font-weight: bold; letter-spacing: 2px; box-shadow: 0 4px 15px rgba(138, 43, 226, 0.4); transition: all 0.3s; }
         button:hover { background: linear-gradient(135deg, #a04ef6, #691b6d); box-shadow: 0 4px 20px rgba(138, 43, 226, 0.6); }
         button:active { transform: translateY(2px); box-shadow: none; }
+        
+        /* 💡 ボタンが押されて通信中のときのスタイル */
+        button:disabled { background: #4a3466; color: #888888; border-color: #4a3466; cursor: not-allowed; box-shadow: none; }
         
         .result-box { margin-top: 30px; padding: 20px; background-color: #1f1430; border: 1px solid #d4af37; border-radius: 12px; display: none; }
         .result-title { font-weight: bold; color: #d4af37; font-size: 16px; border-left: 4px solid #8a2be2; padding-left: 10px; margin-bottom: 15px; letter-spacing: 1px; }
@@ -57,7 +59,7 @@
     </div>
     
     <div class="btn-area">
-        <button py-click="fortune_tell">天命を紐解く</button>
+        <button id="fortune_btn" py-click="fortune_tell">天命を紐解く</button>
     </div>
 
     <div id="result" class="result-box">
@@ -90,6 +92,10 @@ def prime_factors(n):
     return factors
 
 async def fortune_tell(event):
+    # 🔒 ボタンを無効化して連打・重複を徹底ガード！
+    btn = document.getElementById("fortune_btn")
+    btn.disabled = True
+    
     document.getElementById("result").style.display = "block"
     document.getElementById("ai_out").innerHTML = "数式の深層を解読しています。少々お待ちください..."
     
@@ -108,7 +114,7 @@ async def fortune_tell(event):
         
     document.getElementById("formula_out").innerHTML = formula_str
     
-    # 🔑 ジェイのAPIキー分割システム（しっかり継承してるべさ！）
+    # 🔑 ジェイのAPIキー分割システム
     p1 = "AIzaSyC8Q06Ooq44z"
     p2 = "h7qv5EJbCmyWvv-"
     p3 = "EEY3Y5U"
@@ -122,7 +128,6 @@ async def fortune_tell(event):
     todays_guardian_weekday = random.choice(weekdays)
     todays_guardian_day = random.randint(1, 31)
     
-    # 🧠 AIへの指示書（読みやすさとミステリアスさの黄金バランス版）
     prompt = f"""
     あなたは世界の理を数式から読み解く、ミステリアスで知的な「素因数分解占い師」です。
     ユーザーの誕生日から導かれた数字「{target_num}」と、その素因数分解の結果「{formula_str}」をもとに、その人物の運勢や本質、性格を占ってください。
@@ -135,7 +140,7 @@ async def fortune_tell(event):
        - 2や5などの偶数や馴染み深い調和の数が多い場合：多面的な社交性、万物と融和する卓越したコミュニケーションの才、周囲を惹きつける中心人物。
        - 3や7、また大きな奇数（43など）が含まれる場合：鋭利な知性、密かなこだわりを持つクリエイターとしての資質、深層の美意識。
     4. 文字数は250文字〜350文字程度とし、読みやすく、それでいて心に深く残る文章にしてください。
-    5. 文末には、星々の巡りが告げる今期の守護として、以下の「指定された曜日」と「指定された日にち」を厳かに宣告してください。これら以外の数字や素数を勝手に創作してはいけません。
+    5. 文末には、星々の巡りが告げる今期の守護として、以下の「指定された曜日」と「指定された日にち」を厳かに宣告してください。これら以外の数字や素数を勝ために創作してはいけません。
 
     【今期お前に授ける守護の刻印（必ず文末に含めること）】
     ・守護の曜日：{todays_guardian_weekday}
@@ -162,6 +167,9 @@ async def fortune_tell(event):
             document.getElementById("ai_out").innerHTML = f"断絶が検出されました。鍵の整合性を確認してください。（コード: {response.status}）"
     except Exception as e:
         document.getElementById("ai_out").innerHTML = f"通信の調和が乱れました。接続を確認してください。\n({str(e)})"
+    finally:
+        # 🔓 通信が終わったら（成功でも失敗でも）ボタンを元に戻す
+        btn.disabled = False
 </script>
 
 </body>
